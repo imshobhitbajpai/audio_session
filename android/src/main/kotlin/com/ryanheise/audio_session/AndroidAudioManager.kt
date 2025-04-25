@@ -315,22 +315,31 @@ private class AudioManagerSingleton(applicationContext: Context) {
         }
     }
 
-    @RequiresApi(23)
-    fun initAudioDeviceCallback() {
-        audioDeviceCallback = object : AudioDeviceCallback() {
-            override fun onAudioDevicesAdded(addedDevices: Array<AudioDeviceInfo>) {
+@RequiresApi(23)
+fun initAudioDeviceCallback() {
+    audioDeviceCallback = object : AudioDeviceCallback() {
+        override fun onAudioDevicesAdded(addedDevices: Array<AudioDeviceInfo>) {
+            try {
                 invokeMethod("onAudioDevicesAdded", encodeAudioDevices(addedDevices))
-            }
-
-            override fun onAudioDevicesRemoved(removedDevices: Array<AudioDeviceInfo>) {
-                invokeMethod("onAudioDevicesRemoved", encodeAudioDevices(removedDevices))
+            } catch (e: Exception) {
+                e.printStackTrace() // Or log it, or ignore silently
             }
         }
-        audioManager!!.registerAudioDeviceCallback(
-            audioDeviceCallback as AudioDeviceCallback,
-            handler
-        )
+
+        override fun onAudioDevicesRemoved(removedDevices: Array<AudioDeviceInfo>) {
+            try {
+                invokeMethod("onAudioDevicesRemoved", encodeAudioDevices(removedDevices))
+            } catch (e: Exception) {
+                e.printStackTrace() // Or log it, or ignore silently
+            }
+        }
     }
+
+    audioManager!!.registerAudioDeviceCallback(
+        audioDeviceCallback as AudioDeviceCallback,
+        handler
+    )
+}
 
     fun add(manager: AndroidAudioManager) {
         instances.add(manager)
